@@ -7,9 +7,8 @@ import os
 
 class OeBB:
     def __init__(self, cookie_keep_time=2300, auto_auth=True):
-        self.cookie_keep_time = min(cookie_keep_time, 2300)
-        self.cookie_expires = 0
-        self.cookie = ''
+        self.session_keep_time = min(cookie_keep_time, 2300)
+        self.session_expires = 0
         self.headers = {'Channel': 'inet'}
         self.auto_auth = auto_auth
 
@@ -97,24 +96,23 @@ class OeBB:
         return r['offers']
 
     def _make_request(self, url, data=None, params=None):
-        if self.auto_auth and (int(time()) > self.cookie_expires):
+        if self.auto_auth and (int(time()) > self.session_expires):
             self.auth()
         if data is None:
-            r = requests.get(url, headers=self.headers, cookies=self.cookie, params=params)
+            r = requests.get(url, headers=self.headers, params=params)
         else:
-            r = requests.post(url, headers=self.headers, cookies=self.cookie, json=data)
+            r = requests.post(url, headers=self.headers, json=data)
         return r
 
     def auth(self):
         r = requests.get('https://tickets.oebb.at/api/domain/v3/init',
                          headers={'Channel': 'inet'},
                          params={'userId': self._generate_uid()})
-        self.cookie = {'ts-cookie': r.cookies['ts-cookie']}
         r = json.loads(r.text)
         self.headers.update({'AccessToken': r['accessToken'],
                              'SessionId': r['sessionId'],
                              'x-ts-supportid': r['supportId']})
-        self.cookie_expires = int(time()) + self.cookie_keep_time
+        self.session_expires = int(time()) + self.session_keep_time
 
     @staticmethod
     def _generate_uid():
