@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='oebb',
-      version='1.0.0',
+      version='1.0.1',
       description='Python API client for Austrian Federal Railways',
       url='https://github.com/arahorn28/oebb',
       license='MIT',
